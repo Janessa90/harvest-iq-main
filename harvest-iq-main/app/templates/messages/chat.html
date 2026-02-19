@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block title %}Chat with {{ other_user.full_name or other_user.username }}{% endblock %}
+{% block extra_css %}
+<style>
+.chat-container { height: calc(100vh - 200px); display: flex; flex-direction: column; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 20px; background: #f8f9fa; }
+.message { margin-bottom: 15px; display: flex; }
+.message.mine { justify-content: flex-end; }
+.message-bubble { max-width: 70%; padding: 10px 15px; border-radius: 18px; }
+.message.mine .message-bubble { background: #2e7d32; color: white; border-bottom-right-radius: 4px; }
+.message.other .message-bubble { background: white; border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message-time { font-size: 0.7rem; margin-top: 4px; opacity: 0.7; }
+.chat-input-box { padding: 15px; background: white; border-top: 1px solid #dee2e6; }
+.typing-indicator { font-size: 0.8rem; color: #6c757d; font-style: italic; padding: 5px 20px; min-height: 24px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <!-- Header -->
+  <div class="d-flex align-items-center gap-3 mb-3">
+    <a href="{{ url_for('messages.inbox') }}" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-arrow-left"></i>
+    </a>
+    <img src="https://ui-avatars.com/api/?name={{ other_user.full_name or other_user.username }}&background=2e7d32&color=fff&size=40"
+         class="rounded-circle" width="40" height="40"/>
+    <div>
+      <div class="fw-semibold">{{ other_user.full_name or other_user.username }}</div>
+      <div class="text-muted small">{{ '👨‍🌾 Farmer' if other_user.is_farmer else '🛒 Buyer' }}</div>
+    </div>
+  </div>
+
+  <!-- Chat Container -->
+  <div class="card border-0 shadow-sm chat-container" style="border-radius:14px">
+    <!-- Messages -->
+    <div class="chat-messages" id="chatMessages">
+      {% for msg in messages %}
+      <div class="message {{ 'mine' if msg.sender_id == current_user.id else 'other' }}">
+        <div>
+          <div class="message-bubble">
+            {{ msg.message }}
+          </div>
+          <div class="message-time {{ 'text-end' if msg.sender_id == current_user.id }}">
+            {{ msg.created_at.strftime('%I:%M %p') }}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Typing indicator -->
+    <div class="typing-indicator" id="typingIndicator"></div>
+
+    <!-- Input -->
+    <div class="chat-input-box">
+      <form id="messageForm" class="d-flex gap-2">
+        <input type="text" class="form-control" id="messageInput" 
+               placeholder="Type a message..." autocomplete="off"/>
+        <button type="submit" class="btn btn-success px-4">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+const conversationId = {{ conversation.id }};
+const currentUserId = {{ current_user.id }};
+const socket = io();
+
+// Scroll to bottom
+function scrollToBottom() {
+  const messages = document.getElementById('chatMessages');
+  messages.scrollTop = messages.scrollHeight;
+}
+
+// Join conversation room
+socket.on('connect', () => {
+  console.log('Connected to server');
+  socket.emit('join_conversation', { conversation_id: conversationId });
+  scrollToBottom();
+});
+
+// Send message
+document.getElementById('messageForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const input = document.getElementById('messageInput');
+  const message = input.value.trim();
+  
+  if (message) {
+    socket.emit('send_message', {
+      conversation_id: conversationId,
+      message: message
+    });
+    input.value = '';
+  }
+});
+
+// Receive new message from other user
+socket.on('new_message', (data) => {
+  addMessage(data, false);
+  scrollToBottom();
+});
+
+// Confirm sent message
+socket.on('message_sent', (data) => {
+  addMessage(data, true);
+  scrollToBottom();
+});
+
+// Add message to UI
+function addMessage(data, isMine) {
+  const messagesDiv = document.getElementById('chatMessages');
+  const messageHtml = `
+    <div class="message ${isMine ? 'mine' : 'other'}">
+      <div>
+        <div class="message-bubble">${escapeHtml(data.message)}</div>
+        <div class="message-time ${isMine ? 'text-end' : ''}">${data.created_at}</div>
+      </div>
+    </div>
+  `;
+  messagesDiv.insertAdjacentHTML('beforeend', messageHtml);
+}
+
+// Typing indicator
+let typingTimer;
+document.getElementById('messageInput').addEventListener('input', (e) => {
+  clearTimeout(typingTimer);
+  socket.emit('typing', { conversation_id: conversationId, is_typing: true });
+  
+  typingTimer = setTimeout(() => {
+    socket.emit('typing', { conversation_id: conversationId, is_typing: false });
+  }, 1000);
+});
+
+socket.on('user_typing', (data) => {
+  const indicator = document.getElementById('typingIndicator');
+  if (data.is_typing) {
+    indicator.textContent = `${data.username} is typing...`;
+  } else {
+    indicator.textContent = '';
+  }
+});
+
+// Escape HTML
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Leave room on page unload
+window.addEventListener('beforeunload', () => {
+  socket.emit('leave_conversation', { conversation_id: conversationId });
+});
+
+scrollToBottom();
+</script>
+{% endblock %}

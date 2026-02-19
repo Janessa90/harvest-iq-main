@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}{{ farmer.full_name or farmer.username }}'s Store{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <!-- Farmer Banner -->
+  <div class="card border-0 shadow-sm mb-4 overflow-hidden" style="border-radius:16px">
+    <div style="height:120px;background:linear-gradient(135deg,#1b5e20,#4caf50)"></div>
+    <div class="card-body pt-0">
+      <div class="d-flex align-items-end gap-3 mt-n5 mb-3">
+        <img src="https://ui-avatars.com/api/?name={{ farmer.full_name or farmer.username }}&background=ffffff&color=2e7d32&size=90"
+             class="rounded-circle border border-4 border-white shadow" width="90" height="90"/>
+        <div class="pb-1">
+          <h3 class="fw-bold mb-0">{{ farmer.full_name or farmer.username }}'s Farm</h3>
+          <div class="text-muted small"><i class="fas fa-map-marker-alt text-success me-1"></i>{{ farmer.region or 'Philippines' }}</div>
+        </div>
+        <div class="ms-auto pb-1 text-end">
+          <div class="text-warning mb-1">
+            {% for i in range(farmer.average_rating|int) %}⭐{% endfor %}
+            <span class="text-muted small">({{ farmer.average_rating }})</span>
+          </div>
+          <div class="text-muted small">{{ products|length }} products</div>
+        </div>
+      </div>
+      {% if farmer.bio %}
+      <p class="text-muted">{{ farmer.bio }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Products Grid -->
+  <h4 class="fw-bold mb-3">Products from this Farmer</h4>
+  {% if products %}
+  <div class="row g-3">
+    {% for product in products %}
+    <div class="col-6 col-md-4 col-lg-3">{% include 'products/_card.html' %}</div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="fas fa-seedling fa-3x mb-3 opacity-25"></i>
+    <p>No products listed yet.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

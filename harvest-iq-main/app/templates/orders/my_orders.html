@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}My Orders{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h2 class="fw-bold mb-4">📦 My Orders</h2>
+
+  {% if orders.items %}
+  <div class="d-flex flex-column gap-3">
+    {% for order in orders.items %}
+    <div class="card border-0 shadow-sm" style="border-radius:14px">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+          <div>
+            <span class="fw-bold">Order #{{ order.id }}</span>
+            <span class="text-muted small ms-2">{{ order.created_at.strftime('%b %d, %Y · %I:%M %p') }}</span>
+          </div>
+          <div class="d-flex gap-2 align-items-center">
+            <span class="badge px-3 py-2
+              {% if order.status == 'delivered' %}bg-success
+              {% elif order.status == 'cancelled' %}bg-danger
+              {% elif order.status == 'pending' %}bg-warning text-dark
+              {% elif order.status == 'shipped' %}bg-info text-dark
+              {% else %}bg-primary{% endif %}">
+              {{ order.status | title }}
+            </span>
+            <span class="badge {% if order.payment_status == 'paid' %}bg-success{% else %}bg-secondary{% endif %}">
+              {{ order.payment_status | title }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Items preview -->
+        <div class="d-flex gap-2 mb-3 flex-wrap">
+          {% for item in order.items[:3] %}
+          <div class="d-flex align-items-center gap-2 bg-light rounded-3 px-2 py-1">
+            <img src="{{ url_for('static', filename='images/' + item.product.image) }}"
+                 width="32" height="32" class="rounded" style="object-fit:cover"
+                 onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=32&h=32&fit=crop'"/>
+            <span class="small">{{ item.product.name }} ×{{ item.quantity }}</span>
+          </div>
+          {% endfor %}
+          {% if order.items|length > 3 %}
+          <span class="text-muted small d-flex align-items-center">+{{ order.items|length - 3 }} more</span>
+          {% endif %}
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted small">Payment: {{ order.payment_method | upper }}</span>
+            <span class="ms-3 fw-bold text-success">₱{{ "%.2f"|format(order.total_amount) }}</span>
+          </div>
+          <div class="d-flex gap-2">
+            {% if order.status in ['pending', 'confirmed'] %}
+            <form action="{{ url_for('orders.cancel_order', order_id=order.id) }}" method="POST"
+                  onsubmit="return confirm('Cancel this order?')">
+              <button type="submit" class="btn btn-outline-danger btn-sm">Cancel</button>
+            </form>
+            {% endif %}
+            <a href="{{ url_for('orders.order_detail', order_id=order.id) }}" class="btn btn-outline-success btn-sm">View Details</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if orders.pages > 1 %}
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+      {% if orders.has_prev %}<li class="page-item"><a class="page-link" href="?page={{ orders.prev_num }}">‹</a></li>{% endif %}
+      {% for p in orders.iter_pages() %}
+        {% if p %}<li class="page-item {{ 'active' if p == orders.page }}"><a class="page-link" href="?page={{ p }}">{{ p }}</a></li>
+        {% else %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+      {% endfor %}
+      {% if orders.has_next %}<li class="page-item"><a class="page-link" href="?page={{ orders.next_num }}">›</a></li>{% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+
+  {% else %}
+  <div class="text-center py-5">
+    <i class="fas fa-box-open fa-4x text-muted mb-3 opacity-25"></i>
+    <h4 class="text-muted">No orders yet</h4>
+    <p class="text-muted">Start shopping from our fresh produce marketplace!</p>
+    <a href="{{ url_for('products.list_products') }}" class="btn btn-success px-4">Browse Products</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

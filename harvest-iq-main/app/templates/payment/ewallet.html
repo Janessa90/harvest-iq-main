@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Pay with {{ order.payment_method | upper }}{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:500px">
+  <h2 class="fw-bold mb-4">💳 Complete Payment</h2>
+  <div class="card border-0 shadow-sm" style="border-radius:16px">
+    <div class="card-body p-4 text-center">
+      <div style="font-size:4rem">{{ '📱' if order.payment_method == 'gcash' else '💜' }}</div>
+      <h4 class="fw-bold mt-2">{{ 'GCash' if order.payment_method == 'gcash' else 'Maya' }} Payment</h4>
+      <p class="text-muted">Order #{{ order.id }}</p>
+      <div class="bg-light rounded-3 p-3 mb-3">
+        <div class="fw-bold text-success fs-3">₱{{ "%.2f"|format(order.total_amount) }}</div>
+        <div class="text-muted small">Amount to pay</div>
+      </div>
+      <div class="alert alert-info text-start small">
+        <strong>Instructions:</strong><br/>
+        1. Open your {{ 'GCash' if order.payment_method == 'gcash' else 'Maya' }} app<br/>
+        2. Send ₱{{ "%.2f"|format(order.total_amount) }} to <strong>09XX-XXX-XXXX</strong><br/>
+        3. Use Order #{{ order.id }} as reference<br/>
+        4. Enter the reference number below
+      </div>
+      <form action="{{ url_for('payment.confirm_ewallet', order_id=order.id) }}" method="POST">
+        <div class="mb-3">
+          <input type="text" class="form-control text-center" name="reference"
+                 placeholder="Enter reference/transaction number" required/>
+        </div>
+        <button type="submit" class="btn btn-success w-100 btn-lg fw-semibold">Confirm Payment</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

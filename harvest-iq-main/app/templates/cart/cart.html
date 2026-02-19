@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}My Cart{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h2 class="fw-bold mb-4">🛒 My Cart</h2>
+  {% if items %}
+  <div class="row g-4">
+    <!-- Cart Items -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <form action="{{ url_for('cart.update_cart') }}" method="POST" id="cartForm">
+            {% for item in items %}
+            <div class="cart-item d-flex gap-3 align-items-center py-3 {{ 'border-top' if not loop.first }}">
+              <img src="{{ url_for('static', filename='images/' + item.product.image) }}"
+                   class="rounded" width="80" height="80" style="object-fit:cover"
+                   onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=80&h=80&fit=crop'"/>
+              <div class="flex-grow-1">
+                <a href="{{ url_for('products.product_detail', product_id=item.product.id) }}" class="text-dark fw-semibold text-decoration-none">
+                  {{ item.product.name }}
+                </a>
+                <div class="text-muted small">₱{{ "%.2f"|format(item.product.price) }} / {{ item.product.unit }}</div>
+                <div class="text-muted small">Seller: {{ item.product.farmer.full_name or item.product.farmer.username }}</div>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <input type="number" class="form-control form-control-sm text-center qty-input"
+                       name="qty_{{ item.product.id }}" value="{{ item.quantity }}"
+                       min="1" max="{{ item.product.stock_quantity }}" style="width:60px"/>
+                <div class="fw-bold text-success">₱{{ "%.2f"|format(item.subtotal) }}</div>
+                <form action="{{ url_for('cart.remove_from_cart', product_id=item.product.id) }}" method="POST" class="d-inline">
+                  <button type="submit" class="btn btn-link text-danger p-0"><i class="fas fa-trash"></i></button>
+                </form>
+              </div>
+            </div>
+            {% endfor %}
+            <div class="text-end mt-3">
+              <button type="submit" class="btn btn-outline-secondary btn-sm">Update Cart</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3">Order Summary</h5>
+          <div class="d-flex justify-content-between mb-2"><span>Subtotal</span><span>₱{{ "%.2f"|format(total) }}</span></div>
+          <div class="d-flex justify-content-between mb-2 text-muted small">
+            <span>Delivery Fee</span>
+            <span>{% if delivery_fee == 0 %}<span class="text-success">FREE</span>{% else %}₱{{ "%.2f"|format(delivery_fee) }}{% endif %}</span>
+          </div>
+          {% if delivery_fee > 0 %}
+          <div class="alert alert-info py-2 small">Add ₱{{ "%.2f"|format(500 - total) }} more for free delivery!</div>
+          {% endif %}
+          <hr/>
+          <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
+            <span>Total</span><span class="text-success">₱{{ "%.2f"|format(grand_total) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Checkout Form -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3">Checkout Details</h5>
+          <form action="{{ url_for('cart.checkout') }}" method="POST">
+            <div class="mb-3">
+              <label class="fw-semibold small">Delivery Address</label>
+              <textarea class="form-control" name="shipping_address" rows="2" required
+                        placeholder="Full delivery address...">{{ current_user.address or '' }}</textarea>
+            </div>
+            <div class="mb-3">
+              <label class="fw-semibold small">Payment Method</label>
+              {% for code, name in payment_methods.items() %}
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="payment_method"
+                       value="{{ code }}" id="pay_{{ code }}" {{ 'checked' if code == 'cod' }}>
+                <label class="form-check-label small" for="pay_{{ code }}">{{ name }}</label>
+              </div>
+              {% endfor %}
+            </div>
+            <div class="mb-3">
+              <label class="fw-semibold small">Order Notes (optional)</label>
+              <input type="text" class="form-control form-control-sm" name="notes" placeholder="Any special instructions..."/>
+            </div>
+            <button type="submit" class="btn btn-success w-100 btn-lg fw-semibold">
+              <i class="fas fa-lock me-2"></i>Place Order
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="fas fa-shopping-cart fa-4x text-muted mb-4"></i>
+    <h4>Your cart is empty</h4>
+    <p class="text-muted">Add some fresh produce to get started!</p>
+    <a href="{{ url_for('products.list_products') }}" class="btn btn-success px-4">Start Shopping</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

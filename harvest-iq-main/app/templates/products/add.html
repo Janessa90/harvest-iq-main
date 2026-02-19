@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}Add Product{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:700px">
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <a href="{{ url_for('users.dashboard') }}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left"></i></a>
+    <h2 class="fw-bold mb-0">Add New Product</h2>
+  </div>
+
+  <div class="card border-0 shadow-sm" style="border-radius:16px">
+    <div class="card-body p-4">
+      <form method="POST" enctype="multipart/form-data">
+        <!-- Image Upload -->
+        <div class="mb-4 text-center">
+          <div class="image-upload-box mb-2" id="imagePreviewBox" onclick="document.getElementById('imageInput').click()"
+               style="width:100%;height:200px;border:2px dashed #4caf50;border-radius:12px;cursor:pointer;
+                      display:flex;align-items:center;justify-content:center;background:#f1f8e9;overflow:hidden">
+            <img id="imagePreview" src="" style="display:none;width:100%;height:200px;object-fit:cover"/>
+            <div id="uploadPlaceholder">
+              <i class="fas fa-camera fa-2x text-success mb-2"></i>
+              <p class="text-muted mb-0 small">Click to upload product photo</p>
+            </div>
+          </div>
+          <input type="file" name="image" id="imageInput" accept="image/*" class="d-none" onchange="previewImage(this)"/>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="fw-semibold">Product Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="name" required placeholder="e.g., Fresh Organic Tomatoes"/>
+          </div>
+          <div class="col-md-6">
+            <label class="fw-semibold">Category <span class="text-danger">*</span></label>
+            <select class="form-select" name="category_id" required>
+              <option value="">Select category...</option>
+              {% for cat in categories %}
+              <option value="{{ cat.id }}">{{ cat.icon }} {{ cat.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="fw-semibold">Unit <span class="text-danger">*</span></label>
+            <select class="form-select" name="unit">
+              {% for unit in ['kg','gram','piece','bundle','sack','box','tray','liter','dozen'] %}
+              <option value="{{ unit }}">{{ unit }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="fw-semibold">Price (₱) <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text">₱</span>
+              <input type="number" class="form-control" name="price" step="0.01" min="0.01" required placeholder="0.00"/>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="fw-semibold">Stock Quantity <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" name="stock_quantity" min="0" required placeholder="0"/>
+          </div>
+          <div class="col-md-6">
+            <label class="fw-semibold">Minimum Order Quantity</label>
+            <input type="number" class="form-control" name="min_order_quantity" min="1" value="1"/>
+          </div>
+          <div class="col-md-6">
+            <label class="fw-semibold">Location / Farm Area</label>
+            <input type="text" class="form-control" name="location" placeholder="e.g., Benguet, CAR"/>
+          </div>
+          <div class="col-12">
+            <label class="fw-semibold">Description</label>
+            <textarea class="form-control" name="description" rows="3"
+                      placeholder="Describe your product: freshness, growing method, taste, etc."></textarea>
+          </div>
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="is_organic" id="organicSwitch"/>
+              <label class="form-check-label fw-semibold" for="organicSwitch">
+                🌱 This is an organic product
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+          <a href="{{ url_for('users.dashboard') }}" class="btn btn-outline-secondary flex-fill">Cancel</a>
+          <button type="submit" class="btn btn-success flex-fill btn-lg fw-semibold">
+            <i class="fas fa-plus me-2"></i>List Product
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function previewImage(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('imagePreview').src = e.target.result;
+      document.getElementById('imagePreview').style.display = 'block';
+      document.getElementById('uploadPlaceholder').style.display = 'none';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+</script>
+{% endblock %}

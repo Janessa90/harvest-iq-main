@@ -1,0 +1,44 @@
+<div class="card product-card border-0 shadow-sm h-100">
+  {% if product.is_organic %}
+  <div class="product-badge organic-badge">🌱 Organic</div>
+  {% endif %}
+  {% if not product.is_in_stock %}
+  <div class="product-badge out-badge">Out of Stock</div>
+  {% endif %}
+  <a href="{{ url_for('products.product_detail', product_id=product.id) }}">
+    <img src="{{ url_for('static', filename='images/' + product.image) }}"
+         class="card-img-top product-img"
+         alt="{{ product.name }}"
+         onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&h=200&fit=crop'"/>
+  </a>
+  <div class="card-body pb-2">
+    <div class="text-muted small mb-1">{{ product.category.name if product.category else '' }}</div>
+    <h6 class="card-title mb-1 fw-semibold">
+      <a href="{{ url_for('products.product_detail', product_id=product.id) }}" class="text-dark text-decoration-none">
+        {{ product.name }}
+      </a>
+    </h6>
+    <div class="text-muted small mb-2">
+      <i class="fas fa-map-marker-alt text-success me-1"></i>{{ product.location or (product.farmer.region if product.farmer else '') }}
+    </div>
+    <div class="d-flex align-items-center justify-content-between">
+      <div class="fw-bold text-success fs-6">₱{{ "%.2f"|format(product.price) }}<span class="text-muted fw-normal small">/{{ product.unit }}</span></div>
+      <div class="text-warning small">
+        {% set rating = product.average_rating | int %}
+        {% for _ in range(rating) %}⭐{% endfor %}
+        <span class="text-muted">({{ product.review_count }})</span>
+      </div>
+    </div>
+  </div>
+  <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3">
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('products.product_detail', product_id=product.id) }}" class="btn btn-outline-success btn-sm flex-fill">View</a>
+      {% if product.is_in_stock %}
+      <form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="POST" class="flex-fill">
+        <input type="hidden" name="quantity" value="1"/>
+        <button type="submit" class="btn btn-success btn-sm w-100"><i class="fas fa-cart-plus"></i></button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Card Payment{% endblock %}
+{% block extra_css %}
+<style>
+.StripeElement { padding: 12px; border: 1px solid #ced4da; border-radius: 8px; background: white; }
+.StripeElement--focus { border-color: #4caf50; box-shadow: 0 0 0 0.2rem rgba(76,175,80,.25); }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:480px">
+  <h2 class="fw-bold mb-4">💳 Card Payment</h2>
+  <div class="card border-0 shadow-sm" style="border-radius:16px">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-center mb-4 bg-light rounded-3 p-3">
+        <span class="text-muted">Order #{{ order.id }}</span>
+        <span class="fw-bold text-success fs-5">₱{{ "%.2f"|format(order.total_amount) }}</span>
+      </div>
+      <form action="{{ url_for('payment.stripe_charge', order_id=order.id) }}" method="POST" id="stripeForm">
+        <div class="mb-3">
+          <label class="fw-semibold small">Name on Card</label>
+          <input type="text" class="form-control" name="cardholder" required
+                 value="{{ current_user.full_name or '' }}" placeholder="Juan dela Cruz"/>
+        </div>
+        <div class="mb-4">
+          <label class="fw-semibold small">Card Details</label>
+          <div id="card-element" class="StripeElement"></div>
+          <div id="card-errors" class="text-danger small mt-1"></div>
+        </div>
+        <button type="submit" class="btn btn-success w-100 btn-lg fw-semibold" id="payBtn">
+          <i class="fas fa-lock me-2"></i>Pay ₱{{ "%.2f"|format(order.total_amount) }}
+        </button>
+      </form>
+      <div class="text-center mt-3">
+        <img src="https://stripe.com/img/about/logos/logos/blue.png" height="24" alt="Stripe"/>
+        <div class="text-muted small mt-1">Secured by Stripe</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+const stripe = Stripe('{{ pub_key }}');
+const elements = stripe.elements();
+const card = elements.create('card', { style: { base: { fontFamily:'Poppins,sans-serif', fontSize:'16px' } } });
+card.mount('#card-element');
+card.addEventListener('change', e => {
+  document.getElementById('card-errors').textContent = e.error ? e.error.message : '';
+});
+document.getElementById('stripeForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  document.getElementById('payBtn').disabled = true;
+  document.getElementById('payBtn').textContent = 'Processing...';
+  const { token, error } = await stripe.createToken(card);
+  if (error) {
+    document.getElementById('card-errors').textContent = error.message;
+    document.getElementById('payBtn').disabled = false;
+    document.getElementById('payBtn').innerHTML = '<i class="fas fa-lock me-2"></i>Pay ₱{{ "%.2f"|format(order.total_amount) }}';
+  } else {
+    const input = document.createElement('input');
+    input.type = 'hidden'; input.name = 'stripeToken'; input.value = token.id;
+    e.target.appendChild(input);
+    e.target.submit();
+  }
+});
+</script>
+{% endblock %}

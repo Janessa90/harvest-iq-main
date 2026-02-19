@@ -1,0 +1,297 @@
+/* =========================================================
+   ROOT VARIABLES
+========================================================= */
+:root {
+  --green-primary: #2e7d32;
+  --green-light: #4caf50;
+  --green-pale: #e8f5e9;
+  --orange-accent: #ff6f00;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+  --radius: 12px;
+  --transition: all 0.25s ease;
+}
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-padding-top: 90px; /* scroll anchor fix */
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  color: #2d3748;
+  background: #f8faf8;
+  margin: 0;
+  padding: 0;
+}
+
+/* =========================================================
+   NAVBAR (FINAL FIX — NO OVERLAP)
+========================================================= */
+#mainNav {
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+
+  position: sticky;   /* IMPORTANT */
+  top: 0;
+  width: 100%;
+
+  height: 80px;
+  display: flex;
+  align-items: center;
+
+  z-index: 1000;
+}
+
+#mainNav .container {
+  display: flex;
+  align-items: center;
+}
+
+/* NAV LINKS */
+.nav-link {
+  font-weight: 500;
+  color: #444 !important;
+  padding: 0.45rem 0.75rem !important;
+  border-radius: 8px;
+  transition: var(--transition);
+}
+
+.nav-link:hover {
+  color: var(--green-primary) !important;
+  background: var(--green-pale);
+}
+
+/* SEARCH BAR */
+#mainNav form {
+  max-width: 520px;
+  width: 100%;
+}
+
+.search-input {
+  border-radius: 50px 0 0 50px !important;
+  border: 1.5px solid #e0e0e0;
+  padding-left: 1.2rem;
+  height: 38px;
+}
+
+.search-input:focus {
+  border-color: var(--green-light);
+  box-shadow: none;
+}
+
+.search-input + button {
+  border-radius: 0 50px 50px 0 !important;
+}
+
+/* BADGE */
+.cart-badge {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  background: #e53935;
+  color: white;
+  font-size: 0.6rem;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =========================================================
+   HERO SECTION (NO OVERLAP)
+========================================================= */
+.hero-section {
+  background: linear-gradient(
+    135deg,
+    #f1f8e9 0%,
+    #e8f5e9 50%,
+    #f9fbe7 100%
+  );
+
+  min-height: 75vh;
+
+  padding-top: 70px;
+  padding-bottom: 80px;
+
+  display: flex;
+  align-items: center;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(76,175,80,0.08),
+    rgba(139,195,74,0.08)
+  );
+  z-index: -1;
+}
+
+.hero-illustration {
+  font-size: 5rem;
+  line-height: 1.4;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+/* =========================================================
+   CATEGORY CARDS
+========================================================= */
+.category-card .card {
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.category-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md) !important;
+  border-color: var(--green-light) !important;
+}
+
+.category-icon {
+  font-size: 2rem;
+}
+
+/* =========================================================
+   PRODUCT CARDS
+========================================================= */
+.product-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md) !important;
+}
+
+.product-img {
+  height: 180px;
+  object-fit: cover;
+  transition: var(--transition);
+}
+
+.product-card:hover .product-img {
+  transform: scale(1.05);
+}
+
+/* =========================================================
+   FARMER CARD
+========================================================= */
+.farmer-card {
+  transition: var(--transition);
+}
+
+.farmer-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md) !important;
+}
+
+/* =========================================================
+   AUTH PAGES
+========================================================= */
+.auth-page {
+  background: linear-gradient(
+    135deg,
+    #e8f5e9,
+    #f1f8e9,
+    #ffffff
+  );
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+.auth-card {
+  border-radius: 20px !important;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+.btn-success {
+  background: var(--green-primary) !important;
+  border-color: var(--green-primary) !important;
+}
+
+.btn-success:hover {
+  background: #1b5e20 !important;
+  border-color: #1b5e20 !important;
+}
+
+.btn-outline-success {
+  color: var(--green-primary) !important;
+  border-color: var(--green-primary) !important;
+}
+
+.btn-outline-success:hover {
+  background: var(--green-primary) !important;
+  color: #fff !important;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+.footer a:hover {
+  color: #81c784 !important;
+}
+
+/* =========================================================
+   PAGE FADE
+========================================================= */
+main, .container {
+  animation: fadeIn 0.35s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+@media (max-width: 992px) {
+
+  .hero-section {
+    min-height: auto;
+    padding: 70px 0;
+  }
+
+  .hero-illustration {
+    font-size: 3.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .display-4 {
+    font-size: 1.9rem;
+  }
+
+  .brand-name {
+    font-size: 1.2rem;
+  }
+}

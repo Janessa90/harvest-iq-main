@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}Search: {{ q }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <!-- Mobile Search -->
+  <form action="{{ url_for('search.search') }}" method="GET" class="mb-4">
+    <div class="input-group shadow-sm">
+      <input type="text" class="form-control form-control-lg" name="q" value="{{ q }}" placeholder="Search fresh produce..."/>
+      <button class="btn btn-success px-4" type="submit"><i class="fas fa-search me-1"></i>Search</button>
+    </div>
+  </form>
+
+  <div class="row g-4">
+    <!-- Filters -->
+    <div class="col-lg-3">
+      <div class="card border-0 shadow-sm sticky-top" style="top:80px">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3">🔍 Refine Results</h5>
+          <form action="{{ url_for('search.search') }}" method="GET">
+            <input type="hidden" name="q" value="{{ q }}"/>
+            <div class="mb-3">
+              <label class="fw-semibold small">Category</label>
+              {% for cat in categories %}
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="category" value="{{ cat.id }}"
+                       id="scat{{ cat.id }}" {{ 'checked' if selected_category == cat.id }}>
+                <label class="form-check-label small" for="scat{{ cat.id }}">{{ cat.icon }} {{ cat.name }}</label>
+              </div>
+              {% endfor %}
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="category" value="" id="scatAll" {{ 'checked' if not selected_category }}>
+                <label class="form-check-label small" for="scatAll">All</label>
+              </div>
+            </div>
+            <hr/>
+            <div class="mb-3">
+              <label class="fw-semibold small">Price Range (₱)</label>
+              <div class="d-flex gap-2">
+                <input type="number" class="form-control form-control-sm" name="min_price" placeholder="Min" min="0"/>
+                <input type="number" class="form-control form-control-sm" name="max_price" placeholder="Max" min="0"/>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="fw-semibold small">Sort By</label>
+              <select class="form-select form-select-sm" name="sort">
+                <option value="relevance" {{ 'selected' if sort=='relevance' }}>Relevance</option>
+                <option value="popular" {{ 'selected' if sort=='popular' }}>Most Popular</option>
+                <option value="price_asc" {{ 'selected' if sort=='price_asc' }}>Price: Low → High</option>
+                <option value="price_desc" {{ 'selected' if sort=='price_desc' }}>Price: High → Low</option>
+              </select>
+            </div>
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" name="organic" value="1" id="sOrganic" {{ 'checked' if organic == '1' }}>
+              <label class="form-check-label small" for="sOrganic">🌱 Organic Only</label>
+            </div>
+            <button type="submit" class="btn btn-success btn-sm w-100">Apply</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="col-lg-9">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          {% if q %}
+          <h5 class="fw-bold mb-0">Results for "<span class="text-success">{{ q }}</span>"</h5>
+          {% else %}
+          <h5 class="fw-bold mb-0">All Products</h5>
+          {% endif %}
+          <div class="text-muted small">{{ results.total }} products found</div>
+        </div>
+      </div>
+      <div class="row g-3">
+        {% for product in results.items %}
+        <div class="col-6 col-md-4">{% include 'products/_card.html' %}</div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+          <i class="fas fa-search fa-3x text-muted mb-3 opacity-25"></i>
+          <h5 class="text-muted">No products found</h5>
+          <p class="text-muted">Try different keywords or filters.</p>
+          <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-success">Browse All Products</a>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if results.pages > 1 %}
+      <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+          {% if results.has_prev %}<li class="page-item"><a class="page-link" href="?q={{ q }}&page={{ results.prev_num }}">‹</a></li>{% endif %}
+          {% for p in results.iter_pages() %}
+            {% if p %}<li class="page-item {{ 'active' if p == results.page }}"><a class="page-link" href="?q={{ q }}&page={{ p }}">{{ p }}</a></li>
+            {% else %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+          {% endfor %}
+          {% if results.has_next %}<li class="page-item"><a class="page-link" href="?q={{ q }}&page={{ results.next_num }}">›</a></li>{% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

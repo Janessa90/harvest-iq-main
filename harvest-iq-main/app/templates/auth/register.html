@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5" style="max-width:700px;">
+
+  <h2 class="text-center mb-4">Gumawa ng Account</h2>
+
+  <!-- ROLE SELECT -->
+  <div class="d-flex mb-4">
+    <button type="button" class="btn btn-outline-success w-50 me-2"
+            onclick="setRole('buyer')">Mamimili</button>
+
+    <button type="button" class="btn btn-success w-50"
+            onclick="setRole('farmer')">Magsasaka</button>
+  </div>
+
+  <form method="POST">
+
+    <input type="hidden" name="role" id="role" value="buyer">
+
+    <!-- COMMON -->
+    <div class="mb-3">
+      <label>Buong Pangalan</label>
+      <input type="text" name="full_name" class="form-control" required>
+    </div>
+
+    <!-- BUYER EMAIL -->
+    <div class="mb-3 role-buyer">
+      <label>Email Address</label>
+      <input type="email" name="email" class="form-control">
+    </div>
+
+    <!-- FARMER USERNAME -->
+    <div class="mb-3 role-farmer d-none">
+      <label>Username (pang-login)</label>
+      <input type="text" name="username" class="form-control">
+    </div>
+
+    <!-- PHONE -->
+    <div class="mb-3">
+      <label>Contact Number</label>
+      <input type="text" name="phone" class="form-control" required>
+    </div>
+
+    <!-- FARMER PRODUCT -->
+    <div class="mb-3 role-farmer d-none">
+      <label>Produkto na Ibebenta</label>
+      <input type="text" name="products" class="form-control">
+    </div>
+
+    <div class="mb-3 role-farmer d-none">
+      <label>Presyo kada Kilo</label>
+      <input type="number" step="0.01" name="price" class="form-control">
+    </div>
+
+    <!-- ADDRESS -->
+    <div class="mb-3 role-farmer d-none">
+      <label>Province (Region 3)</label>
+      <select name="province" class="form-control">
+        <option>Pampanga</option>
+        <option>Bulacan</option>
+        <option>Nuevo Ecija</option>
+        <option>Tarlac</option>
+        <option>Zambales</option>
+        <option>Bataan</option>
+        <option>Aurora</option>
+      </select>
+    </div>
+
+    <div class="mb-3 role-farmer d-none">
+      <label>City / Municipality</label>
+      <input type="text" name="city" class="form-control">
+    </div>
+
+    <div class="mb-3 role-farmer d-none">
+      <label>Barangay</label>
+      <input type="text" name="barangay" class="form-control">
+    </div>
+
+    <div class="mb-3 role-farmer d-none">
+      <label>Buong Address</label>
+      <textarea name="full_address" class="form-control"></textarea>
+    </div>
+
+    <!-- PASSWORD -->
+    <div class="mb-3">
+      <label>Password</label>
+      <input type="password" name="password" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label>Confirm Password</label>
+      <input type="password" name="confirm_password" class="form-control" required>
+    </div>
+
+    <button class="btn btn-success w-100">Mag Register</button>
+
+  </form>
+</div>
+
+<script>
+function setRole(role) {
+  document.getElementById("role").value = role;
+
+  document.querySelectorAll(".role-buyer").forEach(el =>
+    el.classList.toggle("d-none", role !== "buyer")
+  );
+
+  document.querySelectorAll(".role-farmer").forEach(el =>
+    el.classList.toggle("d-none", role !== "farmer")
+  );
+}
+</script>
+
+{% endblock %}
+```

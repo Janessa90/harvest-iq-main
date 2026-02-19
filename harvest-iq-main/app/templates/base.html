@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<html lang="tl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Harvest IQ{% endblock %}</title>
+
+  <!-- CSS -->
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}"/>
+
+{% block extra_css %}{% endblock %}
+
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+
+<nav class="navbar navbar-expand-lg navbar-light sticky-top shadow-sm bg-white">
+  <div class="container">
+
+```
+<!-- LOGO -->
+<a class="navbar-brand d-flex align-items-center gap-2"
+   href="{{ url_for('main.index') }}">
+  <span style="font-size:1.5rem;">🌾</span>
+  <span class="fw-bold">
+    Harvest<span class="text-success">IQ</span>
+  </span>
+</a>
+
+<!-- SEARCH (Hidden on Login/Register) -->
+{% if request.endpoint not in ['auth.login','auth.register'] %}
+<form class="d-none d-lg-flex flex-grow-1 mx-4"
+      action="{{ url_for('search.search') }}"
+      method="GET">
+
+  <div class="input-group" style="max-width:600px;">
+    <input type="text"
+           class="form-control"
+           name="q"
+           placeholder="Maghanap ng sariwang produkto o magsasaka..."
+           value="{{ request.args.get('q','') }}">
+
+    <button class="btn btn-success">
+      <i class="fas fa-search"></i>
+    </button>
+  </div>
+</form>
+{% endif %}
+
+<!-- TOGGLER -->
+<button class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navMenu">
+  <span class="navbar-toggler-icon"></span>
+</button>
+
+<!-- MENU -->
+<div class="collapse navbar-collapse" id="navMenu">
+  <ul class="navbar-nav ms-auto align-items-center gap-2">
+
+    {% if current_user.is_authenticated %}
+
+    <!-- MESSAGES -->
+    <li class="nav-item">
+      <a class="nav-link position-relative"
+         href="{{ url_for('messages.inbox') }}">
+        <i class="fas fa-comments"></i>
+
+        {% if unread_messages > 0 %}
+        <span class="badge bg-danger">
+          {{ unread_messages }}
+        </span>
+        {% endif %}
+      </a>
+    </li>
+
+    <!-- CART -->
+    <li class="nav-item">
+      <a class="nav-link"
+         href="{{ url_for('cart.view_cart') }}">
+        <i class="fas fa-shopping-cart"></i>
+      </a>
+    </li>
+
+    <!-- USER DROPDOWN -->
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle"
+         href="#"
+         data-bs-toggle="dropdown">
+        {{ current_user.username }}
+      </a>
+
+      <ul class="dropdown-menu dropdown-menu-end">
+
+        <li>
+          <a class="dropdown-item"
+             href="{{ url_for('users.dashboard') }}">
+             Dashboard
+          </a>
+        </li>
+
+        <li>
+          <a class="dropdown-item"
+             href="{{ url_for('users.profile') }}">
+             Profile
+          </a>
+        </li>
+
+        <!-- ADMIN PANEL LINK -->
+        {% if current_user.is_admin %}
+        <li>
+          <a class="dropdown-item text-danger fw-bold"
+             href="{{ url_for('admin.dashboard') }}">
+             🛠 Admin Panel
+          </a>
+        </li>
+        {% endif %}
+
+        <li><hr></li>
+
+        <li>
+          <a class="dropdown-item text-danger"
+             href="{{ url_for('auth.logout') }}">
+             Mag-Logout
+          </a>
+        </li>
+
+      </ul>
+    </li>
+
+    {% else %}
+
+    <!-- GUEST LINKS -->
+    <li class="nav-item">
+      <a class="nav-link"
+         href="{{ url_for('auth.login') }}">
+         Mag-Login
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="btn btn-success btn-sm"
+         href="{{ url_for('auth.register') }}">
+         Mag-Register
+      </a>
+    </li>
+
+    {% endif %}
+
+  </ul>
+</div>
+```
+
+  </div>
+</nav>
+
+<!-- FLASH MESSAGES -->
+
+<div class="container mt-2">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">
+        {{ message }}
+      </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+
+<!-- ================= CONTENT ================= -->
+
+{% block content %}{% endblock %}
+
+<!-- ================= FOOTER ================= -->
+
+<footer class="bg-dark text-white mt-5 p-4 text-center">
+  <p class="mb-0">
+    © {{ now.year if now else 2024 }}
+    Harvest IQ — Para sa Magsasakang Pilipino 🌾
+  </p>
+</footer>
+
+<!-- JS -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}Shop{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="row g-4">
+    <!-- Sidebar Filters -->
+    <div class="col-lg-3">
+      <div class="card border-0 shadow-sm sticky-top" style="top:80px">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3">🔍 Filters</h5>
+          <form action="{{ url_for('products.list_products') }}" method="GET" id="filterForm">
+            <div class="mb-3">
+              <label class="fw-semibold small">Category</label>
+              {% for cat in categories %}
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="category" value="{{ cat.id }}"
+                       id="cat{{ cat.id }}" {{ 'checked' if selected_category == cat.id }}>
+                <label class="form-check-label small" for="cat{{ cat.id }}">{{ cat.icon }} {{ cat.name }}</label>
+              </div>
+              {% endfor %}
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="category" value=""
+                       id="catAll" {{ 'checked' if not selected_category }}>
+                <label class="form-check-label small" for="catAll">All Categories</label>
+              </div>
+            </div>
+            <hr/>
+            <div class="mb-3">
+              <label class="fw-semibold small">Sort By</label>
+              <select class="form-select form-select-sm" name="sort">
+                <option value="newest" {{ 'selected' if sort=='newest' }}>Newest</option>
+                <option value="popular" {{ 'selected' if sort=='popular' }}>Most Popular</option>
+                <option value="price_asc" {{ 'selected' if sort=='price_asc' }}>Price: Low to High</option>
+                <option value="price_desc" {{ 'selected' if sort=='price_desc' }}>Price: High to Low</option>
+              </select>
+            </div>
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" name="organic" value="1" id="organicCheck">
+              <label class="form-check-label small" for="organicCheck">🌱 Organic Only</label>
+            </div>
+            <button type="submit" class="btn btn-success btn-sm w-100">Apply Filters</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="col-lg-9">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold mb-0">
+          {% if selected_category %}{{ categories|selectattr('id','eq',selected_category)|map(attribute='name')|first }}
+          {% else %}All Products{% endif %}
+        </h4>
+        <span class="text-muted small">{{ products.total }} products found</span>
+      </div>
+      <div class="row g-3">
+        {% for product in products.items %}
+        <div class="col-6 col-md-4">{% include 'products/_card.html' %}</div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+          <i class="fas fa-seedling fa-3x text-muted mb-3"></i>
+          <p class="text-muted">No products found. Try different filters.</p>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if products.pages > 1 %}
+      <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+          {% if products.has_prev %}<li class="page-item"><a class="page-link" href="?page={{ products.prev_num }}">‹</a></li>{% endif %}
+          {% for p in products.iter_pages() %}
+            {% if p %}<li class="page-item {{ 'active' if p == products.page }}"><a class="page-link" href="?page={{ p }}">{{ p }}</a></li>
+            {% else %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+          {% endfor %}
+          {% if products.has_next %}<li class="page-item"><a class="page-link" href="?page={{ products.next_num }}">›</a></li>{% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

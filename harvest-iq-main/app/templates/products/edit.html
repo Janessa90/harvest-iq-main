@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}Edit Product{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:700px">
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <a href="{{ url_for('users.dashboard') }}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left"></i></a>
+    <h2 class="fw-bold mb-0">Edit Product</h2>
+  </div>
+
+  <div class="card border-0 shadow-sm" style="border-radius:16px">
+    <div class="card-body p-4">
+      <form method="POST" enctype="multipart/form-data">
+        <!-- Image -->
+        <div class="mb-4 text-center">
+          <div style="width:100%;height:200px;border-radius:12px;overflow:hidden;cursor:pointer;position:relative"
+               onclick="document.getElementById('imageInput').click()">
+            <img id="imagePreview"
+                 src="{{ url_for('static', filename='images/' + product.image) }}"
+                 style="width:100%;height:200px;object-fit:cover"
+                 onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&h=200&fit=crop'"/>
+            <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.5);color:white;
+                        text-align:center;padding:8px;font-size:0.8rem">
+              <i class="fas fa-camera me-1"></i>Click to change photo
+            </div>
+          </div>
+          <input type="file" name="image" id="imageInput" accept="image/*" class="d-none" onchange="previewImage(this)"/>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="fw-semibold">Product Name</label>
+            <input type="text" class="form-control" name="name" required value="{{ product.name }}"/>
+          </div>
+          <div class="col-md-6">
+            <label class="fw-semibold">Category</label>
+            <select class="form-select" name="category_id">
+              {% for cat in categories %}
+              <option value="{{ cat.id }}" {{ 'selected' if cat.id == product.category_id }}>{{ cat.icon }} {{ cat.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="fw-semibold">Unit</label>
+            <select class="form-select" name="unit">
+              {% for unit in ['kg','gram','piece','bundle','sack','box','tray','liter','dozen'] %}
+              <option value="{{ unit }}" {{ 'selected' if unit == product.unit }}>{{ unit }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="fw-semibold">Price (₱)</label>
+            <div class="input-group">
+              <span class="input-group-text">₱</span>
+              <input type="number" class="form-control" name="price" step="0.01" min="0.01" value="{{ product.price }}" required/>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="fw-semibold">Stock Quantity</label>
+            <input type="number" class="form-control" name="stock_quantity" min="0" value="{{ product.stock_quantity }}" required/>
+          </div>
+          <div class="col-12">
+            <label class="fw-semibold">Description</label>
+            <textarea class="form-control" name="description" rows="3">{{ product.description or '' }}</textarea>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check form-switch mt-2">
+              <input class="form-check-input" type="checkbox" name="is_organic" id="organicSwitch" {{ 'checked' if product.is_organic }}/>
+              <label class="form-check-label" for="organicSwitch">🌱 Organic Product</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check form-switch mt-2">
+              <input class="form-check-input" type="checkbox" name="is_available" id="availableSwitch" {{ 'checked' if product.is_available }}/>
+              <label class="form-check-label" for="availableSwitch">✅ Available for Sale</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+          <a href="{{ url_for('users.dashboard') }}" class="btn btn-outline-secondary flex-fill">Cancel</a>
+          <button type="submit" class="btn btn-success flex-fill btn-lg fw-semibold">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function previewImage(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => { document.getElementById('imagePreview').src = e.target.result; };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+</script>
+{% endblock %}
